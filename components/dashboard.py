@@ -13,9 +13,15 @@ class dashboard:
 
     def __init__(self,df:CSVXLSData) -> None:
         self.df = df
-        
-    def display_table(self) -> None:
+    
+    def _display_metric(self) -> None:
         col1,col2 = st.columns(2)
         col1.metric(label="No. of Rows", value=len(self.df))
         col2.metric(label="No. of Columns", value=len(self.df.columns()))
+
+    def _display_table(self) -> None:
         st.dataframe(self.df.data)
+    
+    def display_all(self) -> None:
+        self._display_metric() #displays the metrics
+        self._display_table() #displays the table
