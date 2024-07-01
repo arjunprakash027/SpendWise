@@ -7,11 +7,7 @@ def home() -> None:
 
     if df:
         dash = dashboard.dashboard(df)
-        st.title("Your Data")
-
         dash.display_all()
-
-
 
 if __name__ == '__main__':
     home()
