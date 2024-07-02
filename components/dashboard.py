@@ -24,7 +24,7 @@ class dashboard:
         st.dataframe(self.df.data)
     
     def _display_analytics(self) -> None:
-        tab1, tab2, tab3 = st.tabs(["Aggregation and Spend Tracker", "Incomming analysis", "Incomming analysis"])
+        tab1, tab2, tab3 = st.tabs(["Aggregation and Spend Tracker", "Category Breakdown", "Incomming analysis"])
 
         #tab 1
         if self.df.check_columns(["Date","Amount"]):
@@ -42,6 +42,40 @@ class dashboard:
             tab1.plotly_chart(fig)
         else:
             tab1.write("Date and Amount column not present in the data sheet, Please include it to get this analytics")
+        
+        #category breakdown analysis
+        if self.df.check_columns(["Category","Amount","Date"]):
+
+            group_category_data = self.df.data.groupby('Category')['Amount'].sum().reset_index()
+            fig = px.bar(group_category_data, x='Category', y='Amount', title='Total Amount by Category')
+            tab2.plotly_chart(fig)
+
+            #linechart based on unique categories
+            unique_categories = self.df.data['Category'].unique()
+
+            expander_dataframe_map = []
+            for category in unique_categories:
+                category_df = self.df.data[self.df.data['Category']==category]
+                expander = tab2.expander(f"{category}")
+
+                expander_dataframe_map.append({
+                    "expander":expander,
+                    "df":category_df
+                })
+
+            for expander in expander_dataframe_map:
+                expander['expander'].metric(label=f"Total",value=expander['df']['Amount'].sum())
+                expander['expander'].metric(label=f"Mean Spend",value=f"{round(expander['df']['Amount'].mean())} per day")
+                expander['expander'].metric(label=f"Max Spent",value=expander['df']['Amount'].max())
+                expander['expander'].metric(label=f"Min Spent",value=expander['df']['Amount'].min())
+                # tab1.line_chart(self.df.data,x="Date",y="Amount")
+
+                fig = px.line(expander['df'], x='Date', y='Amount', title='Amount Over Time')
+
+                expander['expander'].plotly_chart(fig)
+
+        else:
+            tab2.write("Category, Amount and (or) Date column not present in the data sheet, Please include it to get this analytics")
 
 
     def display_all(self) -> None:
