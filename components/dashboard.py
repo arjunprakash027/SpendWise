@@ -64,7 +64,7 @@ class dashboard:
             tab1.metric(label="Min Spent",value=self.df_show['Amount'].min())
             # tab1.line_chart(self.df_show,x="Date",y="Amount")
 
-            fig = px.line(self.df_show, x='Date', y='Amount', title='Amount Over Time')
+            fig = px.line(self.df_show, x='Date', y='Amount', title='Amount Over Time',markers=True)
 
             tab1.plotly_chart(fig)
         else:
@@ -80,26 +80,25 @@ class dashboard:
             #linechart based on unique categories
             unique_categories = self.df_show['Category'].unique()
 
-            expander_dataframe_map = []
-            for category in unique_categories:
-                category_df = self.df_show[self.df_show['Category']==category]
-                expander = tab2.expander(f"{category}")
+            options = tab2.multiselect(
+            "Choose single or multiple categories",
+            unique_categories)
+            
+            if options:
+                category_df = self.df_show[self.df_show['Category'].isin(options)]
 
-                expander_dataframe_map.append({
-                    "expander":expander,
-                    "df":category_df
-                })
 
-            for expander in expander_dataframe_map:
-                expander['expander'].metric(label=f"Total",value=expander['df']['Amount'].sum())
-                expander['expander'].metric(label=f"Mean Spend",value=f"{round(expander['df']['Amount'].mean())} per day")
-                expander['expander'].metric(label=f"Max Spent",value=expander['df']['Amount'].max())
-                expander['expander'].metric(label=f"Min Spent",value=expander['df']['Amount'].min())
+                tab2.metric(label=f"Total",value=category_df['Amount'].sum())
+                tab2.metric(label=f"Mean Spend",value=f"{round(category_df['Amount'].mean())} per day")
+                tab2.metric(label=f"Max Spent",value=category_df['Amount'].max())
+                tab2.metric(label=f"Min Spent",value=category_df['Amount'].min())
                 # tab1.line_chart(self.df_show,x="Date",y="Amount")
 
-                fig = px.line(expander['df'], x='Date', y='Amount', title='Amount Over Time')
+                fig = px.line(category_df, x='Date', y='Amount', title='Amount Over Time',markers=True)
 
-                expander['expander'].plotly_chart(fig)
+                tab2.plotly_chart(fig)
+            else:
+                tab2.write("Choose an category to show charts")
 
         else:
             tab2.write("Category, Amount and (or) Date column not present in the data sheet, Please include it to get this analytics")
