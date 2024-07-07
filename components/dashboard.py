@@ -19,11 +19,6 @@ class dashboard:
         self.df = df
         self.df_main = self.df.data
         self.df_show = self.df.data
-        
-    def _display_metric(self) -> None:
-        col1,col2 = st.columns(2)
-        col1.metric(label="No. of Rows", value=len(self.df))
-        col2.metric(label="No. of Columns", value=len(self.df.columns()))
 
     def _change_date(self) -> None:
         if self.df.check_columns(["Date"]):
@@ -46,67 +41,40 @@ class dashboard:
             self.df_show = time_filtered_df
         else:
             st.write("Date column not present in the data sheet, Please include it to get this analytics")
-
-    def _display_table(self) -> None:
-        st.dataframe(self.df_show)
+        
     
     def _display_analytics(self) -> None:
-        tab1, tab2, tab3 = st.tabs(["Aggregation and Spend Tracker", "Category Breakdown", "Incomming analysis"])
 
-        #tab 1
-        if self.df.check_columns(["Date","Amount"]):
-            # self.df_show['Date'] = pd.to_datetime(self.df_show['Date'], format='%d/%m/%Y %H:%M:%S')
-            #self.df_show['Date'] = self.df_show['Date'].dt.date
-
-            tab1.metric(label="Total",value=self.df_show['Amount'].sum())
-            tab1.metric(label="Mean Spend",value=f"{round(self.df_show['Amount'].mean())} per day")
-            tab1.metric(label="Max Spent",value=self.df_show['Amount'].max())
-            tab1.metric(label="Min Spent",value=self.df_show['Amount'].min())
-            # tab1.line_chart(self.df_show,x="Date",y="Amount")
-
-            fig = px.line(self.df_show, x='Date', y='Amount', title='Amount Over Time',markers=True)
-
-            tab1.plotly_chart(fig)
-        else:
-            tab1.write("Date and Amount column not present in the data sheet, Please include it to get this analytics")
+        df = self.df_show
         
-        #category breakdown analysis
-        if self.df.check_columns(["Category","Amount","Date"]):
-
-            group_category_data = self.df_show.groupby('Category')['Amount'].sum().reset_index()
-            fig = px.bar(group_category_data, x='Category', y='Amount', title='Total Amount by Category')
-            tab2.plotly_chart(fig)
-
-            #linechart based on unique categories
-            unique_categories = self.df_show['Category'].unique()
-
-            options = tab2.multiselect(
-            "Choose single or multiple categories",
-            unique_categories)
+        if self.df.check_columns(["Date","Amount"]):
             
-            if options:
-                category_df = self.df_show[self.df_show['Category'].isin(options)]
+            if self.df.check_columns(["Category"]):
+                unique_categories = self.df_show['Category'].unique()
+                options = st.multiselect(
+                "Choose single or multiple categories",
+                unique_categories)
+                if options:
+                    df = self.df_show[self.df_show['Category'].isin(options)]
 
+            st.metric(label="Total",value=df['Amount'].sum())
+            st.metric(label="Mean Spend",value=f"{round(df['Amount'].mean())} per day")
+            st.metric(label="Max Spent",value=df['Amount'].max())
+            st.metric(label="Min Spent",value=df['Amount'].min())
+            # st.line_chart(self.df_show,x="Date",y="Amount")
 
-                tab2.metric(label=f"Total",value=category_df['Amount'].sum())
-                tab2.metric(label=f"Mean Spend",value=f"{round(category_df['Amount'].mean())} per day")
-                tab2.metric(label=f"Max Spent",value=category_df['Amount'].max())
-                tab2.metric(label=f"Min Spent",value=category_df['Amount'].min())
-                # tab1.line_chart(self.df_show,x="Date",y="Amount")
+            fig = px.line(df, x='Date', y='Amount', title='Amount Over Time',markers=True)
 
-                fig = px.line(category_df, x='Date', y='Amount', title='Amount Over Time',markers=True)
+            st.plotly_chart(fig)
 
-                tab2.plotly_chart(fig)
-            else:
-                tab2.write("Choose an category to show charts")
-
+            if self.df.check_columns(["Category"]):
+                group_category_data = self.df_show.groupby('Category')['Amount'].sum().reset_index()
+                fig = px.bar(group_category_data, x='Category', y='Amount', title='Total Amount by Category')
+                st.plotly_chart(fig)
         else:
-            tab2.write("Category, Amount and (or) Date column not present in the data sheet, Please include it to get this analytics")
+            st.write("Date and Amount column not present in the data sheet, Please include it to get this analytics")
 
 
     def display_all(self) -> None:
         self._change_date()
-        with st.expander("View your Data"):
-            self._display_metric() #displays the metrics
-            self._display_table() #displays the table
         self._display_analytics() #displays analytics in tab
