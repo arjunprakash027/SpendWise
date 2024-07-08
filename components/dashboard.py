@@ -69,7 +69,7 @@ class dashboard:
 
             if self.df.check_columns(["Category"]):
                 group_category_data = self.df_show.groupby('Category')['Amount'].sum().reset_index()
-                fig = px.bar(group_category_data, x='Category', y='Amount', title='Total Amount by Category')
+                fig = px.pie(group_category_data, names='Category', values='Amount', title='Total Amount by Category')
                 st.plotly_chart(fig)
         else:
             st.write("Date and Amount column not present in the data sheet, Please include it to get this analytics")
