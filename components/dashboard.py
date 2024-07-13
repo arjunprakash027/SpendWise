@@ -17,14 +17,15 @@ class dashboard:
         self.start_date = 0
         self.end_date = 0
         self.df = df
-        self.df_main = self.df.data
-        self.df_show = self.df.data
+        self.df_main = self.df.data.copy(deep=False)
+        self.df_show = self.df.data.copy(deep=False)
 
     def _change_date(self) -> None:
         if self.df.check_columns(["Date"]):
 
-            self.df_main['Date'] = pd.to_datetime(self.df_main['Date'], format='%d/%m/%Y %H:%M:%S')
-            self.df_show['Date'] = pd.to_datetime(self.df_main['Date'], format='%d/%m/%Y %H:%M:%S')
+            self.df_main['Date'] = pd.to_datetime(pd.to_datetime(self.df_main['Date'], format='%d/%m/%Y %H:%M:%S').dt.date)
+            self.df_show['Date'] = pd.to_datetime(pd.to_datetime(self.df_main['Date'], format='%d/%m/%Y %H:%M:%S').dt.date)
+
 
             oldest_date = self.df_main['Date'].min().strftime('%d/%m/%Y')
             latest_date = self.df_main['Date'].max().strftime('%d/%m/%Y')
@@ -37,8 +38,8 @@ class dashboard:
             format="DD/MM/YY")
 
             time_filtered_df = self.df_main[(self.df_main['Date'] >= start_time) & (self.df_main['Date'] <= end_time + timedelta(days=1))]
-
             self.df_show = time_filtered_df
+            st.write(self.df_show)
         else:
             st.write("Date column not present in the data sheet, Please include it to get this analytics")
         
@@ -46,7 +47,8 @@ class dashboard:
     def _display_analytics(self) -> None:
 
         df = self.df_show
-        
+        grouped_by_day = df.groupby(df['Date'])['Amount'].sum().reset_index()
+
         if self.df.check_columns(["Date","Amount"]):
             
             if self.df.check_columns(["Category"]):
@@ -57,13 +59,17 @@ class dashboard:
                 if options:
                     df = self.df_show[self.df_show['Category'].isin(options)]
 
+            oldest_date = self.df_show['Date'].min()
+            latest_date = self.df_show['Date'].max() + timedelta(days=1)
+
+            difference_in_date: timedelta = latest_date - oldest_date
+
             st.metric(label="Total",value=df['Amount'].sum())
-            st.metric(label="Mean Spend",value=f"{round(df['Amount'].mean())} per day")
+            st.metric(label="Mean Spend",value=f"{df['Amount'].sum()/difference_in_date.days} per day")
             st.metric(label="Max Spent",value=df['Amount'].max())
             st.metric(label="Min Spent",value=df['Amount'].min())
-            # st.line_chart(self.df_show,x="Date",y="Amount")
 
-            fig = px.line(df, x='Date', y='Amount', title='Amount Over Time',markers=True)
+            fig = px.line(grouped_by_day, x='Date', y='Amount', title='Amount Over Time',markers=True)
 
             st.plotly_chart(fig)
 
