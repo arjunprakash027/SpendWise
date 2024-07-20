@@ -21,6 +21,7 @@ class timeseries:
         self.df_ts = pd.DataFrame()
 
     def _calculate_time_series(self) -> None:
+        
         if self.df.check_columns(["Date","Amount"]):
             self.df_main['Date'] = pd.to_datetime(pd.to_datetime(self.df_main['Date'], format='%d/%m/%Y %H:%M:%S').dt.date)
             self.df_ts = self.df_main[['Date','Amount']]
