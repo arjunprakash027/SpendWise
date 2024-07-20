@@ -3,4 +3,5 @@ pandas
 streamlit
 xlrd
 plotly
-prophet
+statsmodels
+pmdarima
