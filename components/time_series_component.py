@@ -35,7 +35,7 @@ class timeseries:
             if adfuller_result[1] > 0.05:
                 daily_expenses = daily_expenses.diff().dropna()
 
-            sarima_model = SARIMAX(daily_expenses, order=(1, 1, 1), seasonal_order=(1, 1, 1, 12))
+            sarima_model = SARIMAX(daily_expenses, order=(1, 1, 1), seasonal_order=(1, 1, 1, 30))
             sarima_result = sarima_model.fit(disp=False)
 
             days_in_future:int = st.slider("Predict for number of days in future", 0, 60, 25)
