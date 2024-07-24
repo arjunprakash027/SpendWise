@@ -14,7 +14,7 @@ def time_series_page() -> None:
 
     if 'available' not in st.session_state:
         st.session_state['available'] = False
-        
+
     st.header('Forecasting Page')
     if st.session_state['available']:
         ts_dash = timeseries(df=st.session_state['df'])
