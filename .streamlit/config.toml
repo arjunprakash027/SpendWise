@@ -1,7 +1,8 @@
 [theme]
-base="light"
-primaryColor="#ffcc00"
-backgroundColor="#000000"
-secondaryBackgroundColor="#1a1a1a"
-textColor="#00ff00"
-font="serif"
+base="dark"
+primaryColor="#00a2ff"  # Soft blue for a modern look
+backgroundColor="#1e1e1e"  # Dark gray for the main background
+secondaryBackgroundColor="#2c2c2c"  # Slightly lighter gray for sidebar
+textColor="#d4d4d4"  # Soft white for text for readability
+font="sans serif"  # Modern, clean font
+
